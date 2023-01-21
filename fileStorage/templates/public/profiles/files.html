@@ -1,0 +1,153 @@
+{% extends 'public/templates/public_template.html' %}
+
+
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <div class="mb-3 mt-3">
+        <h2 class="mb-3" style="font-weight:300">Upload file</h2>
+      <div class="form-group mb-3">
+        <div class="custom-file">
+          <label for="file_input" id="file_input_label" class="custom-file-label">Select file</label>
+          <input type="file" class="custom-file-input" id="file_input" oninput="input_filename();">
+        </div>
+      </div>
+      <button onclick="upload('{{url_for('upload_file')}}');" id="upload_btn" class="btn btn-primary">Upload file</button>
+      <button class="btn btn-primary d-none" id="loading_btn" type="button" disabled>
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        Uploading...
+      </button>
+      <button class="btn btn-secondary d-none" id="cancel_btn" type="button" onclick="reset();">Cancel upload</button>
+    </div>
+    <div id="progress_wrapper" class="d-none">
+      <label id="progress_status">50% uploaded</label>
+      <div class="progress mb-3">
+        <div id="progress" class="progress-bar" role="progressbar" aria-valuenow="25" aria-valuemin="0"
+          aria-valuemax="100"></div>
+      </div>
+    </div>
+    <div id="alert_wrapper"></div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+<script>
+  let progress = document.getElementById('progress');
+  let progress_wrapper = document.getElementById('progress_wrapper');
+  let progress_status = document.getElementById('progress_status');
+
+  let upload_btn = document.getElementById('upload_btn');
+  let loading_btn = document.getElementById('loading_btn');
+  let cancel_btn = document.getElementById('cancel_btn');
+
+  let alert_wrapper = document.getElementById('alert_wrapper');
+
+  let input = document.getElementById('file_input');
+  let file_input_label = document.getElementById('file_input_label');
+
+  function show_alert(message, alert) {
+    alert_wrapper.innerHTML = `
+      <div class="alrt alert-${alert} alert-dismissible fade show" role='alert'>
+        <span>${message}</span>
+        <button type="button" class-"close" data-dismiss="alert" aria-label="Close" >
+          <span aria-hidden="true">&times;</span>  
+        </button>
+        </div>
+    `;
+  }
+
+  function input_filename() {
+    file_input_label.innerText = input.files[0].name;
+  }
+
+  function upload(url) {
+    if (!input.value) {
+      show_alert("No file selected", "warning");
+      return;
+    }
+
+    let data = new FormData();
+
+    let request = new XMLHttpRequest();
+    request.responseType = `json`;
+
+    alert_wrapper.innerHTML = "";
+    input.disabled = true;
+
+    upload_btn.classList.add('d-none');
+
+    loading_btn.classList.remove("d-none");
+
+    cancel_btn.classList.remove("d-none");
+
+    progress_wrapper.classList.remove("d-none");
+
+    let file = input.files[0];
+    let filename = file.name;
+    let filesize = file.size;
+
+    document.cookie = `filesize=${filesize}`;
+    data.append("file", file);
+
+    request.upload.addEventListener("progress", function (e) {
+      let loaded = e.loaded;
+      let total = e.total;
+
+      let percentage_complete = (loaded / total) * 100;
+
+      progress.setAttribute("style", `width: ${Math.floor(percentage_complete)}%`);
+      progress_status.innerText = `${Math.floor(percentage_complete)}% uploaded`;
+
+    });
+
+    request.addEventListener("load", function (e) {
+      if (request.status == 200) {
+        show_alert(`${request.response.message}`, 'success');
+      }
+      else {
+        console.log(e)
+        show_alert("Error uploading file", "danger");
+      }
+
+      reset();
+
+    });
+
+    request.addEventListener("error", function (e) {
+
+      reset();
+      console.log(e)
+      show_alert("Error uploading file", "danger");
+
+    });
+
+    request.open("post", url);
+    request.send(data);
+
+    cancel_btn.addEventListener("click", function(){
+      request.abort();
+    });
+
+  }
+  function reset(){
+      input.value=null;
+
+      input.disabled = false;
+
+      cancel_btn.classList.add("d-none");
+
+      loading_btn.classList.add("d-none");
+
+      upload_btn.classList.remove("d-none");
+
+      progress_wrapper.classList.add("d-none");
+
+      progress.setAttribute("style", "width: 0%");
+
+      file_input_label.innerText = "Select file";
+    }
+
+</script>
+{% endblock %}
