@@ -2,12 +2,13 @@ import time
 import os
 
 from fileStorage import app
-from fileStorage.File import File
+from fileStorage.File import File,get_user_file_name
 from fileStorage.models import User
 from fileStorage import db
 
 from flask import render_template, request, redirect, url_for, make_response, jsonify
 from flask_login import login_user,login_required,logout_user,current_user
+
 
 @app.route('/')
 def index():
@@ -18,11 +19,11 @@ def index():
 def sign_up():
 
     if request.method == "POST":
-        
+
         new_user = User(
-            username = request.form["username"],
-            email = request.form["email"],
-            password = request.form["password"]
+            username=request.form["username"],
+            email=request.form["email"],
+            password=request.form["password"]
         )
 
         users = User.query.filter_by(email =new_user.email).all()
@@ -52,7 +53,6 @@ def login():
     return render_template("public/login.html")
 
 
-
 @app.route("/logout")
 @login_required
 def logout():
@@ -62,9 +62,8 @@ def logout():
 
 @app.route("/profile/files")
 @login_required
-def showFiles():
-    return render_template("/public/profiles/files.html")
-
+def show_user_files():
+    return render_template("/public/profiles/files.html", files=File.show_user_files(current_user))
 
 
 @app.route("/profile/upload-file",methods=["POST"])
@@ -80,4 +79,20 @@ def upload_file():
 
         return res
 
-    return redirect(url_for('showFiles'))
+    return redirect(url_for('show_user_files'))
+
+
+@app.route("/profile/delete-file/<folder_id>",methods=["GET"])
+@login_required
+def delete_file(folder_id):
+
+    # if request.method=="GET":
+
+    # file_name = get_user_file_name(current_user, folder_id)
+    File.delete(current_user,folder_id)
+
+        # res = make_response(jsonify({'message':f"{file_name} deleted"}), 200)
+        #
+        # return res
+
+    return redirect(url_for('show_user_files'))
