@@ -10,30 +10,28 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="/">Hello, {{current_user.username}}</a>
+      {% if current_user.username %}
+      <a class="navbar-brand" href="/">Вітаємо, {{current_user.username}}</a>
+    {% else %}
+    <a class="navbar-brand" href="/">Файлове сховище</a>
+    {% endif %}
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-              <a class="nav-link" href="#">Головна</a>
-            </li>
 
             {% if current_user.username %}
             <li class="nav-item">
-                <a class="nav-link" href="/logout">Вийти</a>
+                <a class="nav-link" href="{{url_for('logout')}}">Вийти</a>
               </li>
-              <li class="nav-item">
-                <p class="nav-link" >Hello, {{current_user.username}}</p>
-              </li>
-          {% else %}\
+          {% else %}
           <li class="nav-item">
-            <a class="nav-link" href="/login">Ввійти</a>
+            <a class="nav-link" href="{{url_for('login')}}">Ввійти</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/sign-up">Реєстрація</a>
+            <a class="nav-link" href="{{url_for('sign_up')}}">Реєстрація</a>
           </li>
           {% endif %}
 

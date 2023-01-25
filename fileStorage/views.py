@@ -1,21 +1,21 @@
-import time
-import os
-
 from fileStorage import app
-from fileStorage.File import File,get_user_file_name,get_user_file_size
+from fileStorage.File import File, get_user_file_name, get_file
 from fileStorage.models import User
 from fileStorage import db
 
-from flask import render_template, request, redirect, url_for, make_response, jsonify
+from flask import render_template, request, redirect, url_for, make_response, jsonify, send_from_directory, send_file
 from flask_login import login_user,login_required,logout_user,current_user
 
 
 @app.route('/')
 def index():
-    return render_template("public/index.html")
+    if current_user.is_authenticated:
+        return redirect(url_for('show_user_files'))
+    else:
+        return redirect(url_for('login'))
 
 
-@app.route("/sign-up",methods=["GET","POST"])
+@app.route("/sign-up",methods=["GET", "POST"])
 def sign_up():
 
     if request.method == "POST":
@@ -101,17 +101,14 @@ def delete_file(folder_id):
 
     return redirect(url_for('show_user_files'))
 
-# @app.route("/profile/download-file/<folder_id>",methods=["POST"])
-# @login_required
-# def delete_file(folder_id):
-#     print(2)
-#     if request.method=="POST":
-#         print(1)
-#         # file_name = get_user_file_name(current_user, folder_id)
-#         File.delete(current_user,folder_id)
-#
-#         # res = make_response(jsonify({'message':f"{file_name} deleted"}), 200)
-#         #
-#         # return res
-#
-#     return redirect(url_for('show_user_files'))
+
+@app.route("/profile/download-file/<folder_id>",methods=["GET"])
+@login_required
+def download_file(folder_id):
+    if request.method=="GET":
+
+        file_directory = get_file(current_user,folder_id)
+
+        return send_file(file_directory, as_attachment=True)
+
+    return redirect(url_for('show_user_files'))

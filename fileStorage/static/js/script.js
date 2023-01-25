@@ -77,13 +77,14 @@ function upload(url) {
 
       new_row.innerHTML = `<th scope="row">${count_folders.length}</th>
       <td>${filename}</td>
-      <td>${filesize} байт</td>
+      <td>${formatBytes(filesize)}</td>
       <td>
       <button onclick="delete_file('delete-file/', '${count_folders.length}', '${request.response.folderId}');" class="btn btn-danger">Видалити</button>
+      <button onclick="downloadURI('download-file/${request.response.folderId}','${filename}');" class="btn btn-success">Завантажити</button>
   </td>
       `
       table.append(new_row)
-    
+
     }
     else {
       console.log(e)
@@ -128,7 +129,7 @@ function reset() {
   file_input_label.innerText = "Select file";
 }
 
-function delete_file(url, id,folderId){
+function delete_file(url, id, folderId) {
   try {
     let row = document.getElementById(`${id}`);
     row.remove();
@@ -138,22 +139,46 @@ function delete_file(url, id,folderId){
     request.responseType = `json`
 
     request.addEventListener("load", function (e) {
-        if (request.status == 200) {
-            show_alert(`${request.response.message}`, 'success');
-        }
+      if (request.status == 200) {
+        show_alert(`${request.response.message}`, 'success');
+      }
     });
 
-   request.addEventListener("error", function (e) {
+    request.addEventListener("error", function (e) {
 
-    console.log(e)
-    show_alert("Error uploading file", "danger");
+      console.log(e)
+      show_alert("Error uploading file", "danger");
 
-  });
+    });
 
-    request.open("post", url+folderId);
+    request.open("post", url + folderId);
     request.send(data)
 
   } catch (error) {
     console.log(error)
   }
+}
+
+function formatBytes(bytes, decimals = 2) {
+  if (!+bytes) return '0 Bytes'
+
+  const k = 1024
+  const dm = decimals < 0 ? 0 : decimals
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+}
+
+
+function downloadURI(uri, name) {
+  var link = document.createElement("a");
+  link.download = name;
+  link.href = uri;
+  document.body.appendChild(link);
+  console.log(link)
+  link.click();
+  document.body.removeChild(link);
+  delete link;
 }
