@@ -2,7 +2,7 @@ import time
 import os
 
 from fileStorage import app
-from fileStorage.File import File,get_user_file_name
+from fileStorage.File import File,get_user_file_name,get_user_file_size
 from fileStorage.models import User
 from fileStorage import db
 
@@ -75,24 +75,43 @@ def upload_file():
         file = File(request.files["file"],current_user)
         file.save()
 
-        res = make_response(jsonify({'message':f"{file} uploaded"}), 200)
+        res = make_response(jsonify({
+            'message': f"{file} uploaded",
+            'folderId': file.get_folder_id(),
+        }), 200)
 
         return res
 
     return redirect(url_for('show_user_files'))
 
 
-@app.route("/profile/delete-file/<folder_id>",methods=["GET"])
+@app.route("/profile/delete-file/<folder_id>",methods=["POST"])
 @login_required
 def delete_file(folder_id):
 
-    # if request.method=="GET":
+    if request.method == "POST":
 
-    # file_name = get_user_file_name(current_user, folder_id)
-    File.delete(current_user,folder_id)
+        file_name = get_user_file_name(current_user, folder_id)
+        File.delete(current_user,folder_id)
 
-        # res = make_response(jsonify({'message':f"{file_name} deleted"}), 200)
-        #
-        # return res
+        res = make_response(jsonify({
+            'message': f"{file_name} deleted",
+        }), 200)
+        return res
 
     return redirect(url_for('show_user_files'))
+
+# @app.route("/profile/download-file/<folder_id>",methods=["POST"])
+# @login_required
+# def delete_file(folder_id):
+#     print(2)
+#     if request.method=="POST":
+#         print(1)
+#         # file_name = get_user_file_name(current_user, folder_id)
+#         File.delete(current_user,folder_id)
+#
+#         # res = make_response(jsonify({'message':f"{file_name} deleted"}), 200)
+#         #
+#         # return res
+#
+#     return redirect(url_for('show_user_files'))
