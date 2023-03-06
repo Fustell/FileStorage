@@ -33,7 +33,7 @@ def sign_up():
         db.session.add(new_user)
         db.session.commit()
 
-        return redirect(request.url)
+        return redirect(url_for('login'))
 
     return render_template("public/sign_up.html")
 
@@ -45,10 +45,10 @@ def login():
         password = request.form["password"]
 
         user = User.query.filter_by(username = request.form["username"]).first()
-        if not user or not password == user.password:
-            return redirect(url_for('login'))
-        login_user(user)
-        return redirect(url_for('index'))
+        if user and user.verify_password(password):
+            login_user(user)
+            return redirect(url_for('index'))
+        return redirect(url_for('login'))
 
     return render_template("public/login.html")
 

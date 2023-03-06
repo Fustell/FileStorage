@@ -1,4 +1,6 @@
-SECRET_KEY = 'fasdkjlfhe3iqruh34345'
-SQLALCHEMY_DATABASE_URI = "sqlite:///database.db"
+import os
+
+SECRET_KEY = os.getenv("SECRET_KEY","undefined")
+SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI","undefined")
 SQLALCHEMY_TRACK_MODIFICATIONS = False
-UPLOAD_FOLDER = "usersFiles"
+UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER","usersFiles")

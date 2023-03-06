@@ -24,3 +24,5 @@ htmlcov/
 .coverage.*
 *,cover
 /fileStorage/usersFiles/
+/instance/database.db
+/migrations

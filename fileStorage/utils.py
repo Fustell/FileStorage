@@ -1,10 +1,9 @@
 
 
-def migrade_db(db,app):
-    db.init_app(app)
+def migrade_db(db):
+    "Import here all necessary models to migrate"
     from fileStorage.models import User
-    with app.app_context():
-        db.create_all()
+    db.create_all()
 
 
 def convert_bytes(size):
