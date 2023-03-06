@@ -1,5 +1,5 @@
 from fileStorage import app
-from fileStorage.File import File, get_user_file_name, get_file
+from fileStorage.File import File
 from fileStorage.models import User
 from fileStorage import db
 
@@ -91,7 +91,7 @@ def delete_file(folder_id):
 
     if request.method == "POST":
 
-        file_name = get_user_file_name(current_user, folder_id)
+        file_name = File.get_user_file_name(current_user, folder_id)
         File.delete(current_user,folder_id)
 
         res = make_response(jsonify({
@@ -107,7 +107,7 @@ def delete_file(folder_id):
 def download_file(folder_id):
     if request.method=="GET":
 
-        file_directory = get_file(current_user,folder_id)
+        file_directory = File.get_file(current_user,folder_id)
 
         return send_file(file_directory, as_attachment=True)
 

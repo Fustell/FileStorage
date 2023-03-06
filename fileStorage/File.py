@@ -6,26 +6,6 @@ from fileStorage.utils import convert_bytes
 
 BASE_DIR = os.path.join(os.path.dirname(__file__),app.config["UPLOAD_FOLDER"])
 
-
-def get_user_file_name(current_user, folderId):
-    user_files_directory = os.path.join(BASE_DIR, current_user.username, str(folderId))
-    return os.listdir(user_files_directory).pop()
-
-
-def get_user_file_size(current_user, folderId):
-    user_file_directory = os.path.join(BASE_DIR, current_user.username, str(folderId),get_user_file_name(current_user, folderId))
-    return os.path.getsize(user_file_directory)
-
-
-def get_file_directory(current_user, folderId):
-    file_directory = os.path.join(BASE_DIR, current_user.username, str(folderId))
-    return file_directory
-
-
-def get_file(current_user, folderId):
-    file = os.path.join(BASE_DIR, current_user.username, str(folderId),get_user_file_name(current_user, folderId))
-    return file
-
 class File:
 
     def __init__(self, file, current_user):
@@ -48,6 +28,27 @@ class File:
 
         self.file.save(os.path.join(user_folder, self.file.filename))
 
+    @classmethod
+    def get_user_file_name(cls, current_user, folderId):
+        user_files_directory = os.path.join(BASE_DIR, current_user.username, str(folderId))
+        return os.listdir(user_files_directory).pop()
+
+    @classmethod
+    def get_user_file_size(cls, current_user, folderId):
+        user_file_directory = os.path.join(BASE_DIR, current_user.username, str(folderId),
+                                           File.get_user_file_name(current_user, folderId))
+        return os.path.getsize(user_file_directory)
+
+    @classmethod
+    def get_file_directory(cls, current_user, folderId):
+        file_directory = os.path.join(BASE_DIR, current_user.username, str(folderId))
+        return file_directory
+
+    @classmethod
+    def get_file(cls, current_user, folderId):
+        file = os.path.join(BASE_DIR, current_user.username, str(folderId), File.get_user_file_name(current_user, folderId))
+        return file
+
     @staticmethod
     def show_user_files(current_user):
 
@@ -59,15 +60,15 @@ class File:
         files_folders = os.listdir(user_files_directory)
 
         return [dict({
-            'filename': get_user_file_name(current_user,folderId),
+            'filename': File.get_user_file_name(current_user,folderId),
             'folderId': folderId,
-            'fileSize': convert_bytes(get_user_file_size(current_user,folderId))
+            'fileSize': convert_bytes(File.get_user_file_size(current_user,folderId))
         }) for folderId in files_folders]
 
     @staticmethod
     def delete(current_user, folder_id):
         user_folder = os.path.join(BASE_DIR, current_user.username, folder_id)
-        os.remove(os.path.join(user_folder, get_user_file_name(current_user,folder_id)))
+        os.remove(os.path.join(user_folder, File.get_user_file_name(current_user,folder_id)))
         os.rmdir(user_folder)
 
 
